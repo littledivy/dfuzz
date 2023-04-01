@@ -67,4 +67,6 @@ async function loadFuzzFunction(module: string) {
   return DenoLLVMFuzzerRunDriver(userCb.pointer);
 }
 
-await loadFuzzFunction("./fuzz_target.ts");
+if (import.meta.main) {
+  await loadFuzzFunction("./fuzz_target.ts");
+}

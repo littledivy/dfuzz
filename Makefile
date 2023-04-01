@@ -13,3 +13,8 @@ SOURCES = $(filter-out libfuzzer/FuzzerMain.cpp, $(wildcard libfuzzer/*.cpp)) fu
 
 build:
 	$(CC) $(CFLAGS)  $(SOURCES) -o $(TARGET)
+
+fmt:
+	deno fmt --ignore=libfuzzer
+
+.PHONY: build fmt
