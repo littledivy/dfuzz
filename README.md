@@ -5,7 +5,7 @@ Fuzzing JS/TS code with LLVM libFuzzer.
 ## Installation
 
 ```
-deno install -Afn --unstable dfuzz https://deno.land/x/dfuzz/fuzzer.ts
+deno install -Afn --unstable dfuzz https://deno.land/x/fuzz/fuzzer.ts
 ```
 
 ## Usage
