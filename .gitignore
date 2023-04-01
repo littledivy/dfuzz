@@ -1,0 +1,4 @@
+*.so
+*.dylib
+libfuzzer.dylib.dSYM/
+.vscode/

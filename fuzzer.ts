@@ -12,6 +12,12 @@ const { symbols } = dlopen("./libfuzzer.dylib", {
     parameters: ["pointer"],
     result: "i32",
   },
+  DenoLLVMFuzzerRunDriverAsync: {
+    parameters: ["pointer"],
+    result: "i32",
+    name: "DenoLLVMFuzzerRunDriver",
+    nonblocking: true,
+  },
   // extern "C" void DenoAbortProcess();
   DenoAbortProcess: {
     parameters: [],
@@ -19,15 +25,7 @@ const { symbols } = dlopen("./libfuzzer.dylib", {
   },
 });
 
-const { DenoLLVMFuzzerRunDriver, DenoAbortProcess } = symbols;
-
-const fuzzTarget = await loadFuzzFunction("./fuzz_target.ts");
-const userCb = new Deno.UnsafeCallback({
-  parameters: ["pointer", "i32"],
-  result: "i32",
-}, fuzzTarget);
-
-DenoLLVMFuzzerRunDriver(userCb.pointer);
+const { DenoLLVMFuzzerRunDriver, DenoLLVMFuzzerRunDriverAsync } = symbols;
 
 async function loadFuzzFunction(module: string) {
   const mod = await import(module);
@@ -36,12 +34,17 @@ async function loadFuzzFunction(module: string) {
     throw new Error("fuzzTarget function not found");
   }
 
-  function fuzzTarget(data: Deno.PointerValue, size: number): number {
+  const async = mod.fuzzTarget.constructor.name === "AsyncFunction";
+
+  async function fuzzTarget(
+    data: Deno.PointerValue,
+    size: number,
+  ): Promise<number> {
     // Do something with the data.
     const buffer = Deno.UnsafePointerView.getArrayBuffer(data!, size);
 
     try {
-      const int = mod.fuzzTarget(new Uint8Array(buffer));
+      const int = await mod.fuzzTarget(new Uint8Array(buffer));
       if (int) return int;
     } catch (e) {
       const error = new Error(e.message);
@@ -53,5 +56,15 @@ async function loadFuzzFunction(module: string) {
     return 0;
   }
 
-  return fuzzTarget;
+  const userCb = Deno.UnsafeCallback.threadSafe({
+    parameters: ["pointer", "i32"],
+    result: "i32",
+  }, fuzzTarget as any);
+
+  if (async) {
+    return DenoLLVMFuzzerRunDriverAsync(userCb.pointer);
+  }
+  return DenoLLVMFuzzerRunDriver(userCb.pointer);
 }
+
+await loadFuzzFunction("./fuzz_target.ts");

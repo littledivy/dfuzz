@@ -1,5 +1,6 @@
-export function fuzzTarget(data: Uint8Array): void {
-  // Do something with the data.
-  try { atob(String.fromCharCode(...data)) } catch (e) {}
-  atob(String.fromCharCode(...data));
+const c = new CompressionStream("gzip");
+const w = c.writable.getWriter();
+
+export async function fuzzTarget(data: Uint8Array) {
+  await w.write(data);
 }
