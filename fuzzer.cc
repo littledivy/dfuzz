@@ -10,9 +10,10 @@ __attribute__((no_sanitize("coverage")))
 extern "C" ATTRIBUTE_INTERFACE int
 DenoLLVMFuzzerRunDriver(int (*UserCb)(const uint8_t *Data, size_t Size)) {
   int argc = 1;
-  char **argv = (char **)malloc(sizeof(char *) * 2);
+  char **argv = (char **)malloc(sizeof(char *) * 3);
   argv[0] = "deno";
-  argv[1] = nullptr;
+  argv[1] = "-artifact_prefix=./";
+  argv[2] = nullptr;
   return fuzzer::FuzzerDriver(&argc, &argv, UserCb);
 }
 

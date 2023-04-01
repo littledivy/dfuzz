@@ -207,8 +207,8 @@ void PrintPC(const char *SymbolizedFMT, const char *FallbackFMT, uintptr_t PC) {
 
 void PrintStackTrace() {
   std::unique_lock<std::mutex> l(SymbolizeMutex, std::try_to_lock);
-  if (EF->__sanitizer_print_stack_trace && l.owns_lock())
-    EF->__sanitizer_print_stack_trace();
+  // if (EF->__sanitizer_print_stack_trace && l.owns_lock())
+  //   EF->__sanitizer_print_stack_trace();
 }
 
 void PrintMemoryProfile() {
